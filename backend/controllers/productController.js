@@ -13,7 +13,6 @@ const Category = require("../models/Category");
 const addProduct = async (req, res) => {
   try {
 
-    // Get product data
     const {
       name,
       description,
@@ -24,7 +23,6 @@ const addProduct = async (req, res) => {
     } = req.body;
 
 
-    // Check required fields
     if (!name || !description || price === undefined || stock === undefined || !category) {
       return res.status(400).json({
         success: false,
@@ -33,7 +31,6 @@ const addProduct = async (req, res) => {
     }
 
 
-    // Check category exists
     const categoryExists = await Category.findById(category);
 
 
@@ -45,7 +42,6 @@ const addProduct = async (req, res) => {
     }
 
 
-    // Create product
     const product = await Product.create({
       name,
       description,
@@ -80,13 +76,44 @@ const addProduct = async (req, res) => {
 // ==========================
 // Get All Products
 // GET /api/products
+// Search Example:
+// /api/products?search=phone
+// Filter Example:
+// /api/products?category=id
 // ==========================
 const getAllProducts = async (req, res) => {
   try {
 
+    const { search, category } = req.query;
 
-    const products = await Product.find()
+
+    let query = {};
+
+
+    // Search Product Name
+    if (search) {
+
+      query.name = {
+        $regex: search,
+        $options: "i",
+      };
+
+    }
+
+
+
+    // Filter Category
+    if (category) {
+
+      query.category = category;
+
+    }
+
+
+
+    const products = await Product.find(query)
       .populate("category", "name");
+
 
 
     res.status(200).json({
@@ -94,6 +121,7 @@ const getAllProducts = async (req, res) => {
       totalProducts: products.length,
       products,
     });
+
 
 
   } catch (error) {
@@ -105,6 +133,8 @@ const getAllProducts = async (req, res) => {
 
   }
 };
+
+
 
 
 
@@ -117,7 +147,6 @@ const getAllProducts = async (req, res) => {
 const getSingleProduct = async (req, res) => {
   try {
 
-
     const { id } = req.params;
 
 
@@ -125,25 +154,30 @@ const getSingleProduct = async (req, res) => {
       .populate("category", "name");
 
 
+
     if (!product) {
+
       return res.status(404).json({
-        success: false,
-        message: "Product not found",
+        success:false,
+        message:"Product not found",
       });
+
     }
 
 
+
     res.status(200).json({
-      success: true,
+      success:true,
       product,
     });
 
 
-  } catch (error) {
+
+  } catch(error){
 
     res.status(500).json({
-      success: false,
-      message: error.message,
+      success:false,
+      message:error.message,
     });
 
   }
@@ -153,19 +187,19 @@ const getSingleProduct = async (req, res) => {
 
 
 
+
+
 // ==========================
 // Update Product
 // PUT /api/products/:id
 // ==========================
-const updateProduct = async (req, res) => {
-  try {
+const updateProduct = async (req,res)=>{
+
+  try{
+
+    const {id}=req.params;
 
 
-    // Get product id
-    const { id } = req.params;
-
-
-    // Get updated data
     const {
       name,
       description,
@@ -173,10 +207,10 @@ const updateProduct = async (req, res) => {
       stock,
       category,
       image,
-    } = req.body;
+    }=req.body;
 
 
-    // Update product
+
     const product = await Product.findByIdAndUpdate(
       id,
       {
@@ -188,35 +222,43 @@ const updateProduct = async (req, res) => {
         image,
       },
       {
-        new: true,
+        new:true,
       }
     );
 
 
-    if (!product) {
+
+    if(!product){
+
       return res.status(404).json({
-        success: false,
-        message: "Product not found",
+        success:false,
+        message:"Product not found",
       });
+
     }
 
 
+
     res.status(200).json({
-      success: true,
-      message: "Product updated successfully",
+      success:true,
+      message:"Product updated successfully",
       product,
     });
 
 
-  } catch (error) {
+
+  }catch(error){
 
     res.status(500).json({
-      success: false,
-      message: error.message,
+      success:false,
+      message:error.message,
     });
 
   }
+
 };
+
+
 
 
 
@@ -226,47 +268,52 @@ const updateProduct = async (req, res) => {
 // Delete Product
 // DELETE /api/products/:id
 // ==========================
-const deleteProduct = async (req, res) => {
-  try {
+const deleteProduct = async(req,res)=>{
 
+  try{
 
-    const { id } = req.params;
+    const {id}=req.params;
 
 
     const product = await Product.findByIdAndDelete(id);
 
 
-    if (!product) {
+
+    if(!product){
+
       return res.status(404).json({
-        success: false,
-        message: "Product not found",
+        success:false,
+        message:"Product not found",
       });
+
     }
 
 
+
     res.status(200).json({
-      success: true,
-      message: "Product deleted successfully",
+      success:true,
+      message:"Product deleted successfully",
     });
 
 
-  } catch (error) {
+
+  }catch(error){
 
     res.status(500).json({
-      success: false,
-      message: error.message,
+      success:false,
+      message:error.message,
     });
 
   }
+
 };
 
 
 
 
 
-// ==========================
+
 // Export Controllers
-// ==========================
 module.exports = {
   addProduct,
   getAllProducts,

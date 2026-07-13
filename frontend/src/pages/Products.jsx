@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 function Products() {
 
   const [products, setProducts] = useState([]);
+  const [search, setSearch] = useState("");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
@@ -19,15 +21,17 @@ function Products() {
       try {
 
         const res = await axios.get(
-          "http://localhost:5000/api/products"
+          `http://localhost:5000/api/products?search=${search}`
         );
 
         setProducts(res.data.products);
+
 
       } catch(err){
 
         console.log(err);
         setError("Failed to load products");
+
 
       } finally {
 
@@ -40,7 +44,10 @@ function Products() {
 
     fetchProducts();
 
-  }, []);
+
+  }, [search]);
+
+
 
 
 
@@ -91,12 +98,16 @@ function Products() {
 
 
 
+
+
   if(loading)
     return <p className="text-center mt-20">Loading products...</p>;
 
 
   if(error)
     return <p className="text-center mt-20 text-red-500">{error}</p>;
+
+
 
 
 
@@ -110,6 +121,17 @@ function Products() {
       </h1>
 
 
+      {/* Search */}
+      <input
+        type="text"
+        placeholder="Search products..."
+        value={search}
+        onChange={(e)=>setSearch(e.target.value)}
+        className="block mx-auto mb-8 w-full max-w-md border rounded-lg px-4 py-3"
+      />
+
+
+
       {
         message &&
         <p className="text-center text-purple-600 mb-5">
@@ -119,10 +141,13 @@ function Products() {
 
 
 
+
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
 
 
         {
+          products.length > 0 ? (
+
           products.map((product)=>(
 
             <div
@@ -168,10 +193,19 @@ function Products() {
             </div>
 
           ))
+
+          ) : (
+
+            <p className="col-span-full text-center text-gray-500">
+              No products found
+            </p>
+
+          )
         }
 
 
       </div>
+
 
     </div>
 
