@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { Heart } from "lucide-react";
 
 function Products() {
 
@@ -11,7 +12,35 @@ function Products() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  const [wishlistIds, setWishlistIds] = useState([]);
+
   const token = localStorage.getItem("token");
+
+
+  // Fetch current wishlist (only if logged in)
+  const fetchWishlist = async () => {
+
+    if (!token) return;
+
+    try {
+
+      const res = await axios.get(
+        "http://localhost:5000/api/wishlist",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      const ids = res.data.wishlist.map((p) => p._id);
+      setWishlistIds(ids);
+
+    } catch (err) {
+      console.log(err);
+    }
+
+  };
 
 
   useEffect(() => {
@@ -47,6 +76,10 @@ function Products() {
 
   }, [search]);
 
+
+  useEffect(() => {
+    fetchWishlist();
+  }, []);
 
 
 
@@ -93,6 +126,43 @@ function Products() {
     setTimeout(()=>{
       setMessage("");
     },2000);
+
+  };
+
+
+
+  // Toggle Wishlist (Add/Remove)
+  const handleToggleWishlist = async (productId) => {
+
+    if (!token) {
+      setMessage("Please login to use wishlist");
+      setTimeout(() => setMessage(""), 2000);
+      return;
+    }
+
+    try {
+
+      const res = await axios.put(
+        `http://localhost:5000/api/wishlist/${productId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (res.data.inWishlist) {
+        setWishlistIds((prev) => [...prev, productId]);
+      } else {
+        setWishlistIds((prev) =>
+          prev.filter((id) => id !== productId)
+        );
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
 
   };
 
@@ -148,12 +218,30 @@ function Products() {
         {
           products.length > 0 ? (
 
-          products.map((product)=>(
+          products.map((product)=>{
+
+            const isWishlisted = wishlistIds.includes(product._id);
+
+            return (
 
             <div
               key={product._id}
-              className="bg-white rounded-lg shadow-md p-4 hover:shadow-xl transition"
+              className="relative bg-white rounded-lg shadow-md p-4 hover:shadow-xl transition"
             >
+
+              {/* Wishlist Heart Icon */}
+              <button
+                onClick={() => handleToggleWishlist(product._id)}
+                className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm rounded-full p-2 shadow hover:scale-110 transition-transform"
+              >
+                <Heart
+                  className={`w-5 h-5 ${
+                    isWishlisted
+                      ? "fill-red-500 text-red-500"
+                      : "text-gray-400"
+                  }`}
+                />
+              </button>
 
 
               <Link to={`/products/${product._id}`}>
@@ -192,7 +280,9 @@ function Products() {
 
             </div>
 
-          ))
+            );
+
+          })
 
           ) : (
 

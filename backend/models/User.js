@@ -45,6 +45,14 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    // Wishlist - Array of Product References
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+      },
+    ],
   },
   {
     // Automatically creates createdAt & updatedAt

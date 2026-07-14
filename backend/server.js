@@ -15,6 +15,7 @@ const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");
 const userRoutes = require("./routes/userRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
+const wishlistRoutes = require("./routes/wishlistRoutes");
 
 // Load environment variables
 dotenv.config();
@@ -62,6 +63,9 @@ app.use("/api/users", userRoutes);
 
 // Dashboard Routes
 app.use("/api/dashboard", dashboardRoutes);
+
+// Wishlist Routes
+app.use("/api/wishlist", wishlistRoutes);
 
 // Test Route
 app.get("/", (req, res) => {

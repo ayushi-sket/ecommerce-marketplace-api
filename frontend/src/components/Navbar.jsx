@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { FaShoppingCart, FaUser } from "react-icons/fa";
+import { FaShoppingCart, FaUser, FaHeart } from "react-icons/fa";
 
 function Navbar() {
   const navigate = useNavigate();
@@ -85,6 +85,15 @@ function Navbar() {
             className="text-gray-700 hover:text-purple-600 font-medium"
           >
             Login
+          </Link>
+        )}
+
+        {token && (
+          <Link to="/wishlist">
+            <FaHeart
+              size={22}
+              className="text-gray-700 hover:text-red-500"
+            />
           </Link>
         )}
 
