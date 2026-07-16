@@ -10,57 +10,72 @@ function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-
     navigate("/login");
     window.location.reload();
   };
 
   return (
     <nav className="bg-white shadow-md px-8 py-4 flex items-center justify-between">
-      
       {/* Logo */}
-      <Link
-        to="/"
-        className="text-2xl font-bold text-purple-600"
-      >
+      <Link to="/" className="text-2xl font-bold text-purple-600">
         ShopSphere
       </Link>
 
       {/* Menu */}
       <div className="hidden md:flex gap-8 text-gray-700 font-medium">
 
-        <Link
-          to="/"
-          className="hover:text-purple-600"
-        >
-          Home
-        </Link>
+        {/* Customer */}
+        {(!token || user?.role === "customer") && (
+          <>
+            <Link to="/" className="hover:text-purple-600">
+              Home
+            </Link>
 
-        <Link
-          to="/products"
-          className="hover:text-purple-600"
-        >
-          Products
-        </Link>
+            <Link to="/products" className="hover:text-purple-600">
+              Products
+            </Link>
 
-        {token && (
-          <Link
-            to="/orders"
-            className="hover:text-purple-600"
-          >
-            Orders
-          </Link>
+            {token && (
+              <Link to="/orders" className="hover:text-purple-600">
+                My Orders
+              </Link>
+            )}
+          </>
         )}
 
-        {token && (
-          <Link
-            to="/admin"
-            className="hover:text-purple-600"
-          >
-            Admin
-          </Link>
+        {/* Manager */}
+        {user?.role === "manager" && (
+          <>
+            <Link to="/manager" className="hover:text-purple-600">
+              Dashboard
+            </Link>
+
+            <Link to="/admin/products" className="hover:text-purple-600">
+              Products
+            </Link>
+
+            <Link to="/admin/orders" className="hover:text-purple-600">
+              Orders
+            </Link>
+          </>
         )}
 
+        {/* Admin */}
+        {user?.role === "admin" && (
+          <>
+            <Link to="/admin" className="hover:text-purple-600">
+              Dashboard
+            </Link>
+
+            <Link to="/admin/products" className="hover:text-purple-600">
+              Products
+            </Link>
+
+            <Link to="/admin/orders" className="hover:text-purple-600">
+              Orders
+            </Link>
+          </>
+        )}
       </div>
 
       {/* Right Side */}
@@ -69,7 +84,7 @@ function Navbar() {
         {token ? (
           <>
             <span className="text-gray-700 font-medium">
-              Hi, {user?.name || "User"}
+              Hi, {user?.name}
             </span>
 
             <button
@@ -88,31 +103,31 @@ function Navbar() {
           </Link>
         )}
 
-        {token && (
-          <Link to="/wishlist">
-            <FaHeart
-              size={22}
-              className="text-gray-700 hover:text-red-500"
-            />
-          </Link>
+        {/* Customer Only */}
+        {user?.role === "customer" && (
+          <>
+            <Link to="/wishlist">
+              <FaHeart
+                size={22}
+                className="text-gray-700 hover:text-red-500"
+              />
+            </Link>
+
+            <Link to="/cart">
+              <FaShoppingCart
+                size={22}
+                className="text-gray-700 hover:text-purple-600"
+              />
+            </Link>
+
+            <Link to="/profile">
+              <FaUser
+                size={22}
+                className="text-gray-700 hover:text-purple-600"
+              />
+            </Link>
+          </>
         )}
-
-        <Link to="/cart">
-          <FaShoppingCart
-            size={22}
-            className="text-gray-700 hover:text-purple-600"
-          />
-        </Link>
-
-        {token && (
-          <Link to="/profile">
-            <FaUser
-              size={22}
-              className="text-gray-700 hover:text-purple-600"
-            />
-          </Link>
-        )}
-
       </div>
     </nav>
   );

@@ -13,7 +13,14 @@ import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
-// Admin Pages
+// Customer & Manager Dashboards
+import CustomerDashboard from "./pages/CustomerDashboard";
+import ManagerDashboard from "./pages/ManagerDashboard";
+import ManagerProducts from "./manager/ManagerProducts";
+import ManagerEditProduct from "./manager/EditProduct";
+import ManagerOrders from "./manager/ManagerOrders";
+
+// Admin Dashboard
 import Dashboard from "./admin/Dashboard";
 import AdminProducts from "./admin/Products";
 import AddProduct from "./admin/AddProduct";
@@ -26,7 +33,6 @@ function App() {
       <Navbar />
 
       <Routes>
-
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
@@ -34,11 +40,71 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
 
-        {/* Customer Protected Routes */}
+        {/* Customer Dashboard */}
+        <Route
+          path="/customer"
+          element={
+            <PrivateRoute allowedRoles={["customer"]}>
+              <CustomerDashboard />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Manager Dashboard */}
+        <Route
+          path="/manager"
+          element={
+            <PrivateRoute allowedRoles={["manager"]}>
+              <ManagerDashboard />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Manager Products */}
+        <Route
+          path="/manager/products"
+          element={
+            <PrivateRoute allowedRoles={["manager"]}>
+              <ManagerProducts />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Manager Edit Product */}
+        <Route
+          path="/manager/products/edit/:id"
+          element={
+            <PrivateRoute allowedRoles={["manager"]}>
+              <ManagerEditProduct />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Manager Orders */}
+        <Route
+          path="/manager/orders"
+          element={
+            <PrivateRoute allowedRoles={["manager"]}>
+              <ManagerOrders />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Admin Dashboard */}
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute allowedRoles={["admin"]}>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Customer Routes */}
         <Route
           path="/cart"
           element={
-            <PrivateRoute>
+            <PrivateRoute allowedRoles={["customer"]}>
               <Cart />
             </PrivateRoute>
           }
@@ -47,7 +113,7 @@ function App() {
         <Route
           path="/wishlist"
           element={
-            <PrivateRoute>
+            <PrivateRoute allowedRoles={["customer"]}>
               <Wishlist />
             </PrivateRoute>
           }
@@ -56,7 +122,7 @@ function App() {
         <Route
           path="/orders"
           element={
-            <PrivateRoute>
+            <PrivateRoute allowedRoles={["customer"]}>
               <Orders />
             </PrivateRoute>
           }
@@ -65,27 +131,17 @@ function App() {
         <Route
           path="/profile"
           element={
-            <PrivateRoute>
+            <PrivateRoute allowedRoles={["customer"]}>
               <Profile />
             </PrivateRoute>
           }
         />
 
         {/* Admin Routes */}
-
-        <Route
-          path="/admin"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
-
         <Route
           path="/admin/products"
           element={
-            <PrivateRoute>
+            <PrivateRoute allowedRoles={["admin"]}>
               <AdminProducts />
             </PrivateRoute>
           }
@@ -94,7 +150,7 @@ function App() {
         <Route
           path="/admin/products/add"
           element={
-            <PrivateRoute>
+            <PrivateRoute allowedRoles={["admin"]}>
               <AddProduct />
             </PrivateRoute>
           }
@@ -103,7 +159,7 @@ function App() {
         <Route
           path="/admin/products/edit/:id"
           element={
-            <PrivateRoute>
+            <PrivateRoute allowedRoles={["admin"]}>
               <EditProduct />
             </PrivateRoute>
           }
@@ -112,12 +168,11 @@ function App() {
         <Route
           path="/admin/orders"
           element={
-            <PrivateRoute>
+            <PrivateRoute allowedRoles={["admin"]}>
               <AdminOrders />
             </PrivateRoute>
           }
         />
-
       </Routes>
     </BrowserRouter>
   );

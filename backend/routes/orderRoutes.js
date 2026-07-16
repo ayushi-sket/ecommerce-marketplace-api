@@ -9,7 +9,10 @@ const {
   updateOrderStatus,
 } = require("../controllers/orderController");
 
-const { protect, admin } = require("../middleware/authMiddleware");
+const {
+  protect,
+  adminOrManager,
+} = require("../middleware/authMiddleware");
 
 // ===============================
 // Customer Routes
@@ -24,16 +27,14 @@ router.get("/my-orders", protect, getMyOrders);
 // Get Order By ID
 router.get("/:id", protect, getOrderById);
 
-
 // ===============================
-// Admin Routes
+// Admin & Manager Routes
 // ===============================
 
 // Get All Orders
-router.get("/", protect, admin, getAllOrders);
+router.get("/", protect, adminOrManager, getAllOrders);
 
 // Update Order Status
-router.put("/:id/status", protect, admin, updateOrderStatus);
-
+router.put("/:id/status", protect, adminOrManager, updateOrderStatus);
 
 module.exports = router;

@@ -2,8 +2,6 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
-// redirectPath: jahan Save/Cancel ke baad wapas bhejna hai
-// (Admin ke liye "/admin/products", Manager ke liye "/manager/products")
 function EditProductForm({ redirectPath }) {
 
   const { id } = useParams();
@@ -25,7 +23,6 @@ function EditProductForm({ redirectPath }) {
 
   const token = localStorage.getItem("token");
 
-  // Load product data + categories list
   useEffect(() => {
 
     const fetchData = async () => {
@@ -223,4 +220,3 @@ function EditProductForm({ redirectPath }) {
 }
 
 export default EditProductForm;
-

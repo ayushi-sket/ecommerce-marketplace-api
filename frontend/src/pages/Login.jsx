@@ -18,10 +18,18 @@ function Login() {
         password,
       });
 
+      // Save token and user
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
-      navigate("/");
+      // Redirect based on role
+      if (res.data.user.role === "admin") {
+        navigate("/admin");
+      } else if (res.data.user.role === "manager") {
+        navigate("/manager");
+      } else {
+        navigate("/customer");
+      }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     }

@@ -1,7 +1,36 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { Heart, Pencil, Trash2 } from "lucide-react";
+
+// 🔑 Helper: detects role from whichever storage pattern your app uses
+function getUserRole() {
+  // 1. Direct role key
+  const directRole = localStorage.getItem("role");
+  if (directRole) return directRole;
+
+  // 2. User object stored as JSON (e.g. localStorage.setItem("user", JSON.stringify(userObj)))
+  const userStr = localStorage.getItem("user");
+  if (userStr) {
+    try {
+      const user = JSON.parse(userStr);
+      if (user?.role) return user.role;
+    } catch (e) {}
+  }
+
+  // 3. Decode role directly from JWT token payload
+  const token = localStorage.getItem("token");
+  if (token) {
+    try {
+      const base64Url = token.split(".")[1];
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      const payload = JSON.parse(atob(base64));
+      if (payload?.role) return payload.role;
+    } catch (e) {}
+  }
+
+  return null; // not logged in / role not found
+}
 
 function Products() {
 
@@ -15,6 +44,7 @@ function Products() {
   const [wishlistIds, setWishlistIds] = useState([]);
 
   const token = localStorage.getItem("token");
+  const role = getUserRole(); // "customer" | "manager" | "admin" | null
 
 
   // Fetch current wishlist (only if logged in)
@@ -130,6 +160,46 @@ function Products() {
   };
 
 
+  const handleBuyNow = (productId) => {
+    // Redirect to checkout/product page — adjust route as needed
+    window.location.href = `/checkout/${productId}`;
+  };
+
+
+  const handleEditProduct = (productId) => {
+    window.location.href = `/products/edit/${productId}`;
+  };
+
+
+  const handleDeleteProduct = async (productId) => {
+
+    if (!window.confirm("Delete this product?")) return;
+
+    try {
+
+      await axios.delete(
+        `http://localhost:5000/api/products/${productId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      setProducts((prev) => prev.filter((p) => p._id !== productId));
+      setMessage("Product deleted");
+
+    } catch (err) {
+      setMessage(
+        err.response?.data?.message || "Failed to delete product"
+      );
+    }
+
+    setTimeout(() => setMessage(""), 2000);
+
+  };
+
+
 
   // Toggle Wishlist (Add/Remove)
   const handleToggleWishlist = async (productId) => {
@@ -229,19 +299,49 @@ function Products() {
               className="relative bg-white rounded-lg shadow-md p-4 hover:shadow-xl transition"
             >
 
-              {/* Wishlist Heart Icon */}
-              <button
-                onClick={() => handleToggleWishlist(product._id)}
-                className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm rounded-full p-2 shadow hover:scale-110 transition-transform"
-              >
-                <Heart
-                  className={`w-5 h-5 ${
-                    isWishlisted
-                      ? "fill-red-500 text-red-500"
-                      : "text-gray-400"
-                  }`}
-                />
-              </button>
+              {/* Wishlist Heart Icon — Customer only */}
+              {role === "customer" && (
+                <button
+                  onClick={() => handleToggleWishlist(product._id)}
+                  className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm rounded-full p-2 shadow hover:scale-110 transition-transform"
+                >
+                  <Heart
+                    className={`w-5 h-5 ${
+                      isWishlisted
+                        ? "fill-red-500 text-red-500"
+                        : "text-gray-400"
+                    }`}
+                  />
+                </button>
+              )}
+
+              {/* Admin: Edit + Delete icons */}
+              {role === "admin" && (
+                <div className="absolute top-3 right-3 z-10 flex gap-2">
+                  <button
+                    onClick={() => handleEditProduct(product._id)}
+                    className="bg-white/80 backdrop-blur-sm rounded-full p-2 shadow hover:scale-110 transition-transform"
+                  >
+                    <Pencil className="w-5 h-5 text-blue-600" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteProduct(product._id)}
+                    className="bg-white/80 backdrop-blur-sm rounded-full p-2 shadow hover:scale-110 transition-transform"
+                  >
+                    <Trash2 className="w-5 h-5 text-red-600" />
+                  </button>
+                </div>
+              )}
+
+              {/* Manager: Edit icon only */}
+              {role === "manager" && (
+                <button
+                  onClick={() => handleEditProduct(product._id)}
+                  className="absolute top-3 right-3 z-10 bg-white/80 backdrop-blur-sm rounded-full p-2 shadow hover:scale-110 transition-transform"
+                >
+                  <Pencil className="w-5 h-5 text-blue-600" />
+                </button>
+              )}
 
 
               <Link to={`/products/${product._id}`}>
@@ -269,13 +369,33 @@ function Products() {
               </p>
 
 
+              {/* Action buttons — Customer only (Manager/Admin use icons above instead) */}
+              {role === "customer" && (
+                <div className="flex flex-col gap-2 mt-3">
+                  <button
+                    onClick={()=>handleAddToCart(product._id)}
+                    className="w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700"
+                  >
+                    Add to Cart
+                  </button>
+                  <button
+                    onClick={()=>handleBuyNow(product._id)}
+                    className="w-full bg-gray-900 text-white py-2 rounded-lg hover:bg-gray-800"
+                  >
+                    Buy Now
+                  </button>
+                </div>
+              )}
 
-              <button
-                onClick={()=>handleAddToCart(product._id)}
-                className="mt-3 w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700"
-              >
-                Add to Cart
-              </button>
+              {/* Not logged in — show login-required cart button like before */}
+              {!role && (
+                <button
+                  onClick={()=>handleAddToCart(product._id)}
+                  className="mt-3 w-full bg-purple-600 text-white py-2 rounded-lg hover:bg-purple-700"
+                >
+                  Add to Cart
+                </button>
+              )}
 
 
             </div>
